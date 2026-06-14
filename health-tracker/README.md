@@ -88,6 +88,12 @@ Once connected, there's nothing else to set up — just ask Claude things like *
 today?"* or *"how many calories did I burn on my run?"* and it pulls your Strava workouts in.
 (Button wording may vary slightly by Cowork version. You can skip this and add Strava anytime.)
 
+> **Want the *dashboard's* burn number to include Strava too?** By default Strava shows up
+> when you ask Claude in chat, but the dashboard's "Burned today" only counts manual exercise
+> + resting. To have your runs/rides feed the dashboard automatically, just say **"set up my
+> Strava auto-sync"** — Claude will create a daily task that pulls Strava into your folder, and
+> the dashboard picks it up. Optional, and you can add it anytime.
+
 That's it — you're running.
 
 ---
