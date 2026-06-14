@@ -2,22 +2,22 @@
 {
   "name": "Health Tracker",
   "schemaVersion": 1,
-  "description": "Daily food + exercise + gut-symptom tracker with net-calorie headline, macro breakdown, VO₂max zone minutes, food↔symptom correlation, and a 7-day net-calorie chart. Saves to plain Markdown files in your local HealthTracker folder via the bundled health-files connector.",
+  "description": "Daily food + exercise + gut-symptom tracker with net-calorie headline, macro breakdown, VO₂max zone minutes, food↔symptom correlation, and a 7-day net-calorie chart. Saves to plain Markdown files in your local HealthTracker folder via the Filesystem desktop extension you install. NOTE: the setup skill rewrites these tool names + FS_PREFIX below to match your installed Filesystem connector.",
   "mcpTools": [
-    "mcp__health-files__read_text_file",
-    "mcp__health-files__write_file",
-    "mcp__health-files__list_directory",
-    "mcp__health-files__read_multiple_files",
-    "mcp__health-files__create_directory",
-    "mcp__health-files__list_allowed_directories"
+    "mcp__filesystem__read_text_file",
+    "mcp__filesystem__write_file",
+    "mcp__filesystem__list_directory",
+    "mcp__filesystem__read_multiple_files",
+    "mcp__filesystem__create_directory",
+    "mcp__filesystem__list_allowed_directories"
   ],
   "mcpServerNames": [
-    "health-files",
-    "health-files",
-    "health-files",
-    "health-files",
-    "health-files",
-    "health-files"
+    "filesystem",
+    "filesystem",
+    "filesystem",
+    "filesystem",
+    "filesystem",
+    "filesystem"
   ]
 }
 </script>
@@ -282,9 +282,12 @@ form.entry select:focus { outline: none; border-color: #78716c; }
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <script>
-// ---- Local-file connector (bundled with the plugin as "health-files") ----
-// If your Cowork build namespaces plugin MCP tools differently, change FS_PREFIX only.
-const FS_PREFIX = "mcp__health-files__";
+// ---- Local-file connector (the Filesystem desktop extension you installed) ----
+// FS_PREFIX must match how your installed Filesystem connector namespaces its tools. The
+// setup skill sets this for you when it creates the dashboard (based on the actual connected
+// tool names). The default below assumes the connector is registered as "filesystem".
+// If reads/writes fail, this single line is the thing to fix.
+const FS_PREFIX = "mcp__filesystem__";
 const GET_TOOL = FS_PREFIX + "read_text_file";
 const PUT_TOOL = FS_PREFIX + "write_file";
 const LIST_TOOL = FS_PREFIX + "list_directory";
@@ -292,7 +295,7 @@ const BATCH_TOOL = FS_PREFIX + "read_multiple_files";
 const MKDIR_TOOL = FS_PREFIX + "create_directory";
 const ALLOWED_TOOL = FS_PREFIX + "list_allowed_directories";
 
-// Paths are absolute, rooted at the folder the health-files connector is allowed to use
+// Paths are absolute, rooted at the folder the Filesystem connector is allowed to use
 // (discovered at startup). Filled in by setPaths()/discoverBase() before any I/O.
 let BASE = "";
 let VAULT_DIR = "", STRAVA_DIR = "", LIBRARY_PATH = "", SYMPTOM_PATH = "";
