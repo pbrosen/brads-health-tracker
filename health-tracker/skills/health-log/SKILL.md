@@ -327,12 +327,19 @@ For a symptom: `Logged: diarrhea (mild · Bristol 5) at 09:30 on Jun 13.`
 If the Health Tracker folder is empty / files don't exist yet, or Jim asks to "set up my
 Health Tracker":
 
-1. Make sure his data folder exists (default `~/HealthTracker`) and is connected to Cowork.
-   Create the `food-log/` subfolder if needed.
+1. Make sure the **Filesystem desktop extension** is installed and pointed at his data
+   folder (default `~/HealthTracker`), and that the folder is connected to Cowork. Create the
+   `food-log/` subfolder if needed. (No Node — the extension bundles its own runtime.)
 2. Create the dashboard artifact from the bundled HTML at
-   `${CLAUDE_PLUGIN_ROOT}/skills/health-log/references/dashboard.html` — read that file and
-   create a Cowork artifact named "Health Tracker" with its contents. The dashboard
-   auto-discovers the data folder via the bundled `health-files` connector.
+   `${CLAUDE_PLUGIN_ROOT}/skills/health-log/references/dashboard.html`. **Before creating it,
+   wire it to his Filesystem connector:** check which filesystem tools are actually connected
+   (e.g. `write_file`, `read_text_file`, `list_directory`, `read_multiple_files`,
+   `create_directory`, `list_allowed_directories`) and their fully-qualified names
+   (`mcp__<server>__<tool>`). In the HTML, set `FS_PREFIX` and the `cowork-artifact-meta`
+   `mcpTools`/`mcpServerNames` to match, and pass those exact tool names as the artifact's
+   `mcp_tools` when you call `create_artifact`. The default assumes the connector is named
+   `filesystem`; if his differs, that's the one thing to fix. The dashboard then
+   auto-discovers the data folder via `list_allowed_directories`.
 3. Tell him he can now log by chatting (this skill) or in the dashboard, and that Strava
    workouts appear when he asks you about burn/net in chat.
 
