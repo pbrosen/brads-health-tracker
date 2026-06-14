@@ -97,6 +97,7 @@ form.entry button.add:disabled { background: #a8a29e; cursor: not-allowed; }
 .toast.err { background: #b91c1c; }
 .footer { color: #a8a29e; font-size: 11px; text-align: center; padding: 14px; }
 .footer a { color: #78716c; cursor: pointer; text-decoration: underline; }
+.byline { position: fixed; bottom: 14px; right: 14px; z-index: 20; background: rgba(255,255,255,0.85); backdrop-filter: blur(4px); border: 1px solid #e7e5e4; border-radius: 999px; padding: 5px 12px; font-size: 11px; color: #78716c; box-shadow: 0 1px 4px rgba(0,0,0,0.06); pointer-events: none; }
 .spinner { display: inline-block; width: 11px; height: 11px; border: 2px solid #d6d3d1; border-top-color: #57534e; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: -1px; margin-left: 5px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .saving { color: #a8a29e; font-size: 11px; font-weight: 400; text-transform: none; letter-spacing: 0; }
@@ -274,6 +275,8 @@ form.entry select:focus { outline: none; border-color: #78716c; }
     Data is saved as plain Markdown files in your local Health Tracker folder · <code>food-log/YYYY-MM-DD.md</code> · <code>food-log/_library.md</code> · <code>symptom-log.md</code>. Resting burn uses the Mifflin–St Jeor BMR formula.
   </div>
 </div>
+
+<div class="byline">Created by Brad Rosen</div>
 
 <div class="toast" id="toast"></div>
 
