@@ -2,21 +2,24 @@
 
 This plugin uses two kinds of tools.
 
-## 1. Local files (bundled — no setup in the connector store)
+## 1. Local files — the Filesystem extension (you install it once)
 
-The plugin ships its own local-file connector called **`health-files`** (defined in
-`.mcp.json`). It runs the standard Model Context Protocol filesystem server on your
-machine and gives the dashboard read/write access to **one folder**:
+The dashboard saves to your computer through the official **Filesystem desktop extension**.
+It's a one-click install from Claude's **Settings → Extensions** directory and is fully
+self-contained — it bundles its own runtime, so there's **no Node, no terminal, and no
+config files** to deal with.
 
-```
-~/HealthTracker
-```
+During install, point it at **one folder** — your `~/HealthTracker` folder — and that's
+where all your data lives, as plain Markdown files. Nothing leaves your computer. See
+`README.md` (steps 1–2) for the click-through.
 
-That's where all your data lives, as plain Markdown files. Nothing leaves your
-computer. See `README.md` for the one-time setup (it needs Node.js installed).
-
-If your data folder is somewhere other than `~/HealthTracker`, edit the last line of
-`.mcp.json` to point at it.
+> **Tool-name note (for Claude at setup):** the dashboard talks to the Filesystem extension
+> via `window.cowork.callMcpTool(...)`. The exact tool prefix the extension registers under
+> can vary by machine/version. When the setup skill creates the dashboard, it sets the
+> dashboard's `FS_PREFIX` (and the artifact's `mcp_tools`) to match the actual connected
+> filesystem tools (e.g. `read_text_file` / `write_file` / `list_directory` /
+> `read_multiple_files` / `create_directory` / `list_allowed_directories`). The default
+> assumes the connector is named `filesystem`.
 
 ## 2. Strava (you connect your own)
 
@@ -24,8 +27,8 @@ If your data folder is somewhere other than `~/HealthTracker`, edit the last lin
 | --------------- | ------------- | ---------------------------------------- |
 | Fitness / workouts | `~~fitness` | **Strava** (any Strava MCP connector)    |
 
-Strava is read **live by Claude in chat** to fill in your workout calories and
-VO₂ minutes when you ask about burn or net calories. Connect Strava from Cowork's
-connector store. The visual dashboard does **not** talk to Strava directly (workout
-data shows up when you ask Claude in chat), so the dashboard works fine even before
-Strava is connected.
+Strava is read **live by Claude in chat** to fill in your workout calories and VO₂ minutes
+when you ask about burn or net calories. The visual dashboard counts Strava in its burn
+number only if activity files exist in `HealthTracker/strava/activities/` — set up the
+optional **Strava auto-sync** task (see `skills/health-log/references/strava-sync.md`) to
+keep those fresh. The dashboard works fine even before Strava is connected.
