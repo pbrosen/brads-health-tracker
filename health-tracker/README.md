@@ -73,8 +73,20 @@ Say to Claude: **"Set up my Health Tracker dashboard."** Claude creates the dash
 ### 7. Enter your numbers
 
 In the dashboard, open **⚙ Calorie-burn settings** and enter your weight, height, and age
-(these drive the resting-calorie math). *Optional:* connect **Strava** from Cowork's
-connector store to count your runs/rides.
+(these drive the resting-calorie math).
+
+### 8. Connect Strava  (optional)
+
+Strava lets Claude count your runs and rides toward your burn and net calories.
+
+1. In Cowork, open the **connector store / directory** (the same place you add connectors).
+2. Find **Strava** and click **Connect**.
+3. You'll be sent to Strava's site — **sign in** and click **Authorize** to grant access.
+4. Back in Cowork, make sure **Strava is enabled for this chat** (check the "+" → Connectors panel).
+
+Once connected, there's nothing else to set up — just ask Claude things like *"what's my net
+today?"* or *"how many calories did I burn on my run?"* and it pulls your Strava workouts in.
+(Button wording may vary slightly by Cowork version. You can skip this and add Strava anytime.)
 
 That's it — you're running.
 
