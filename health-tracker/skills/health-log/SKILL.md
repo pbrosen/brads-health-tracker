@@ -58,12 +58,15 @@ protein_g: 85
 carbs_g: 160
 fat_g: 55
 vo2_zone_min_manual: 0
+bmr_per_day: 1693
+neat_kcal: 350
 ---
 
 ## Summary
 - Calories in: **1450** · manual exercise out: **0**
 - Protein **85g** · Carbs **160g** · Fat **55g**
 - Manual VO₂max zone minutes: **0**
+- Resting burn: BMR **1693** + NEAT **350** = **2043** kcal/day
 - _(Strava-derived burn + VO₂ min are read live and not duplicated here.)_
 
 ## Food
@@ -74,7 +77,7 @@ vo2_zone_min_manual: 0
 _(none yet)_
 
 <!--DATA
-{"food":[{"id":"f...","time":"07:30","name":"2 eggs and toast","cal":280,"p":18,"c":24,"f":14,"note":"2 eggs scrambled, 1 slice whole-wheat toast","source":"ai"},{"id":"f...","time":"12:45","name":"turkey sandwich and chips","cal":720,"p":35,"c":78,"f":28,"note":"","source":"library"}],"exercise":[]}
+{"food":[{"id":"f...","time":"07:30","name":"2 eggs and toast","cal":280,"p":18,"c":24,"f":14,"note":"2 eggs scrambled, 1 slice whole-wheat toast","source":"ai"},{"id":"f...","time":"12:45","name":"turkey sandwich and chips","cal":720,"p":35,"c":78,"f":28,"note":"","source":"library"}],"exercise":[],"bmr_per_day":1693,"neat_kcal":350}
 -->
 ```
 
@@ -82,6 +85,12 @@ Frontmatter numbers, the Summary section, and the human-readable Food/Exercise s
 are all **derived from** the JSON inside the `<!--DATA ... -->` block at the bottom. The
 DATA block is the source of truth. Always rebuild the whole file from the JSON; never try
 to surgically edit only the human-readable parts — they'll drift out of sync.
+
+The `bmr_per_day` and `neat_kcal` fields are a per-day snapshot of the resting-burn math
+(Mifflin–St Jeor BMR + NEAT, non-exercise activity thermogenesis). They're written by the
+dashboard so historical days don't shift when Jim later changes his settings. **Preserve
+them when you rebuild a file** (see "Building the day file"). They're optional — a day file
+that predates this feature simply won't have them, and that's fine.
 
 If a day has no food and no exercise, the Food and Manual exercise sections each read
 `_(none yet)_`.
@@ -148,7 +157,7 @@ If Jim says "log my run", it's almost certainly already in Strava — check Stra
 ## Gut symptoms (digestion tracking)
 
 Digestive episodes are logged to a single rolling file `BASE/symptom-log.md` (NOT per-day —
-day files get rebuilt on every save and would clobber anything stored in them). Trigger
+day files get rebuilt on every save, so anything stored there would be clobbered). Trigger
 on things like "log diarrhea", "loose stool this morning", "constipated today",
 "bloated/gassy after lunch", optionally with a Bristol number and a suspected trigger.
 
@@ -233,7 +242,7 @@ When Jim asks about burn or net for a date:
 1. Sum food → intake calories + macros from the day file.
 2. Pull that date's Strava activities (calories burned + any VO₂/high-HR minutes).
 3. Add manual exercise calories from the day file.
-4. Add Jim's prorated resting burn (BMR math below).
+4. Add Jim's prorated resting burn (BMR + NEAT math below).
 5. Net = intake − total burn.
 
 If Strava isn't connected yet, report intake + manual exercise + resting burn, and note
@@ -241,12 +250,18 @@ that Strava workouts aren't included until he connects Strava.
 
 ### Jim's stats (for BMR / resting calorie math)
 
-These live in the dashboard's **Calorie-burn settings** (weight, height, age) and are the
-source of truth. If you don't know them, ask Jim once and remember them for the session.
+These live in the dashboard's **Calorie-burn settings** (weight, height, age, default NEAT)
+and are the source of truth. If you don't know them, ask Jim once and remember them for the
+session.
 
 - BMR (Mifflin–St Jeor, male): `10 × weight_kg + 6.25 × height_cm − 5 × age + 5` kcal/day.
   (For female, the constant is `− 161` instead of `+ 5`. Confirm with Jim if unsure.)
-- Prorated resting burn so far today: `BMR × (minutes_elapsed_today / 1440)`.
+- **NEAT** (non-exercise activity thermogenesis — walking, stairs, errands): a flat kcal/day
+  added to BMR. Default ≈ 350; Jim can override it globally in Settings or per-day in the
+  dashboard. If a day file has a `neat_kcal` field, use it for that day; otherwise use the
+  default. Likewise prefer the day file's `bmr_per_day` over recomputing when it's present.
+- Resting burn for a day = `bmr_per_day + neat_kcal` (full day).
+- Prorated resting burn so far today: `resting_burn × (minutes_elapsed_today / 1440)`.
 
 If Jim mentions a weight change in chat, remind him to update it in the dashboard's
 Settings panel so the two stay in sync (you can't write the dashboard's stored settings).
@@ -269,13 +284,19 @@ After mutating the `food` and `exercise` arrays, regenerate the whole file:
 1. Sum totals: `calories_in`, `calories_out_manual` (Σ exercise.cal), `net_calories_manual`
    (calories_in − calories_out_manual), `protein_g`, `carbs_g`, `fat_g`,
    `vo2_zone_min_manual` (Σ exercise.vo2). Round calories to whole numbers; macros to one decimal.
-2. Build the frontmatter, `## Summary`, `## Food`, `## Manual exercise`, then the DATA block.
-3. **Food list lines:** `- HH:MM — name _(note if present)_ — N cal · NP / NC / NF`. Only
+2. **Preserve resting-burn fields.** If the file you read had `bmr_per_day` / `neat_kcal`,
+   carry them through unchanged (and emit them in the frontmatter, the Summary "Resting burn"
+   line, and the DATA block). If it didn't have them, you may compute `bmr_per_day` from Jim's
+   stats and use the default `neat_kcal` (≈350) — or simply omit both; the dashboard will fill
+   them the next time Jim opens it. Never *drop* values that were already there.
+3. Build the frontmatter, `## Summary`, `## Food`, `## Manual exercise`, then the DATA block.
+4. **Food list lines:** `- HH:MM — name _(note if present)_ — N cal · NP / NC / NF`. Only
    include the italic note if `note` is non-empty.
-4. **Exercise list lines:** `- HH:MM — name (N min) — N cal · N VO₂ min`. Duration in parens
+5. **Exercise list lines:** `- HH:MM — name (N min) — N cal · N VO₂ min`. Duration in parens
    only if `dur > 0`.
-5. **DATA block JSON** must be on a single line — `JSON.stringify({food, exercise})` style,
-   no pretty-printing. Parse your own JSON back before writing to be sure it's valid.
+6. **DATA block JSON** must be on a single line — `JSON.stringify({food, exercise, bmr_per_day,
+   neat_kcal})` style (omit `bmr_per_day`/`neat_kcal` if you have no values), no pretty-printing.
+   Parse your own JSON back before writing to be sure it's valid.
 
 ## Library handling
 
@@ -349,5 +370,6 @@ Health Tracker":
 - Don't break the DATA block JSON. Parse it back before writing.
 - Don't silently overwrite a day's entire log. Append; only consolidate if Jim asks.
 - Don't store gut symptoms in day files — they go in the rolling `symptom-log.md`.
-- Don't try to write the dashboard's stored Settings (weight/height/age) — those are in the
-  dashboard's local storage; ask Jim to change them in the Settings panel.
+- Don't drop a day's `bmr_per_day` / `neat_kcal` when rebuilding it — carry them through.
+- Don't try to write the dashboard's stored Settings (weight/height/age/NEAT) — those are in
+  the dashboard's local storage; ask Jim to change them in the Settings panel.
